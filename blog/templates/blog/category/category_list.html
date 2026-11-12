@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Categories
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 30px auto; font-family: sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>All Categories</h2>
+        <div>
+            <a href="{% url 'list' %}" style="margin-right: 15px; color: #666; text-decoration: none;">&larr; Back to Posts</a>
+            <a href="{% url 'category_create' %}" style="padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">+ Add Category</a>
+        </div>
+    </div>
+
+    {% if categories %}
+        <table style="width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+            <thead>
+                <tr style="background-color: #f1f3f5; border-bottom: 2px solid #ddd; text-align: left;">
+                    <th style="padding: 12px 16px;">#</th>
+                    <th style="padding: 12px 16px;">Category Name</th>
+                    <th style="padding: 12px 16px;">Total Posts</th>
+                    <th style="padding: 12px 16px;">Created</th>
+                    <th style="padding: 12px 16px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 12px 16px; color: #888;">{{ forloop.counter }}</td>
+                        <td style="padding: 12px 16px; font-weight: bold;">
+                            <a href="{% url 'category_detail' category.pk %}" style="color: #007bff; text-decoration: none;">
+                                {{ category.name }}
+                            </a>
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <span style="background: #e9ecef; padding: 2px 8px; border-radius: 10px; font-size: 13px;">
+                                {{ category.posts.count }} post{{ category.posts.count|pluralize }}
+                            </span>
+                        </td>
+                        <td style="padding: 12px 16px; color: #777; font-size: 13px;">
+                            {{ category.created_at|date:"M d, Y" }}
+                        </td>
+                        <td style="padding: 12px 16px; text-align: right;">
+                            <a href="{% url 'category_detail' category.pk %}" style="color: #007bff; text-decoration: none; font-size: 13px; margin-right: 10px;">View</a>
+                            <a href="{% url 'category_edit' category.pk %}" style="color: #28a745; text-decoration: none; font-size: 13px; margin-right: 10px;">Edit</a>
+                            <a href="{% url 'category_delete' category.pk %}" style="color: #dc3545; text-decoration: none; font-size: 13px;">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if is_paginated %}
+            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" style="padding: 6px 12px; border: 1px solid #ddd; background: #fff; color: #007bff; text-decoration: none; border-radius: 4px;">Previous</a>
+                {% endif %}
+                <span style="padding: 6px 12px; border: 1px solid #007bff; background: #007bff; color: white; border-radius: 4px;">{{ page_obj.number }}</span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" style="padding: 6px 12px; border: 1px solid #ddd; background: #fff; color: #007bff; text-decoration: none; border-radius: 4px;">Next</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div style="text-align: center; padding: 40px; border: 1px dashed #ccc; border-radius: 8px; color: #777; background: #fff;">
+            <p>No categories found.</p>
+            <a href="{% url 'category_create' %}" style="color: #007bff;">Create the first category</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

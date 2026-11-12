@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Create Blog
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 30px auto; font-family: sans-serif;">
+    <h2>Create New Blog Post</h2>
+
+    <!-- novalidate disables browser HTML5 validation so backend Django validation runs -->
+    <form action="{% url 'blog_create' %}" method="POST" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">Create Post</button>
+    </form>
+</div>
+{% endblock %}

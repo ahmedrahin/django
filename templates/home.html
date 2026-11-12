@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+<div style="font-family: sans-serif;">
+    <!-- Hero Banner -->
+    <div style="text-align: center; padding: 50px 20px; background: #fff; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 30px;">
+        <h1 style="font-size: 36px; margin: 0 0 15px 0; color: #212529;">Welcome to Django Blog</h1>
+        <p style="font-size: 17px; color: #6c757d; max-width: 600px; margin: 0 auto 25px auto; line-height: 1.6;">
+            Discover interesting articles, learn new things, and join the discussion.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <a href="{% url 'list' %}" style="padding: 10px 22px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                View All Posts &rarr;
+            </a>
+            <a href="{% url 'category_list' %}" style="padding: 10px 22px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                Browse Categories
+            </a>
+        </div>
+    </div>
+
+    <!-- Session Testing Box -->
+    <div style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h3 style="margin: 0 0 12px 0; color: #333;">Session Test (No Database)</h3>
+        <form method="POST" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            {% csrf_token %}
+            <input 
+                type="text" 
+                name="session_value" 
+                placeholder="Enter a value to store in session..." 
+                required 
+                style="flex: 1; min-width: 220px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px;"
+            >
+            <button type="submit" name="action" value="set" style="padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                Set Session
+            </button>
+        </form>
+
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="color: #666; font-size: 14px;">Stored Session Value:</span>
+                {% if session_value %}
+                    <strong style="color: #007bff; font-size: 16px; margin-left: 6px;">{{ session_value }}</strong>
+                {% else %}
+                    <span style="color: #999; font-style: italic; margin-left: 6px;">None (Empty)</span>
+                {% endif %}
+            </div>
+
+            {% if session_value %}
+                <form method="POST" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="delete" style="padding: 6px 14px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                        Delete Session
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Categories Section -->
+    {% if categories %}
+        <div style="margin-bottom: 35px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #333;">Categories</h3>
+                <a href="{% url 'category_list' %}" style="color: #007bff; text-decoration: none; font-size: 14px;">View all &rarr;</a>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                {% for category in categories %}
+                    <a href="{% url 'category_detail' category.pk %}" style="padding: 8px 16px; background: #fff; border: 1px solid #dee2e6; border-radius: 20px; color: #495057; text-decoration: none; font-size: 14px; font-weight: 500;">
+                        📁 {{ category.name }} <span style="color: #888; font-size: 12px;">({{ category.posts.count }})</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Recent Posts Section -->
+    <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: #333;">Recent Posts</h3>
+            <a href="{% url 'list' %}" style="color: #007bff; text-decoration: none; font-size: 14px;">See all posts &rarr;</a>
+        </div>
+
+        {% if recent_posts %}
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                {% for post in recent_posts %}
+                    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; display: flex; gap: 20px; align-items: flex-start; background: #fff;">
+                        {% if post.thumb %}
+                            <img src="{{ post.thumb.url }}" alt="{{ post.title }}" style="width: 140px; height: 90px; object-fit: cover; border-radius: 6px;">
+                        {% endif %}
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <h4 style="margin: 0;">
+                                    <a href="{% url 'blog_details' post.id %}" style="color: #212529; text-decoration: none;">
+                                        {{ post.title }}
+                                    </a>
+                                </h4>
+                                {% if post.category %}
+                                    <span style="background-color: #e9ecef; color: #495057; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                                        {{ post.category.name }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <p style="color: #666; font-size: 14px; margin: 0 0 8px 0;">
+                                {{ post.description|default:''|truncatewords:20 }}
+                            </p>
+                            <small style="color: #999;">Published on: {{ post.created_at|date:"F j, Y" }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 30px; background: #fff; border: 1px dashed #ccc; border-radius: 8px; color: #777;">
+                <p style="margin: 0;">No blog posts published yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

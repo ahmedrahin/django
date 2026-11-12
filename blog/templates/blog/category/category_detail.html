@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Category: {{ category.name }}
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 30px auto; font-family: sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <a href="{% url 'category_list' %}" style="color: #007bff; text-decoration: none; font-size: 14px;">&larr; Back to Categories</a>
+            <h1 style="margin: 10px 0 5px 0;">{{ category.name }}</h1>
+            <p style="color: #666; margin: 0; font-size: 14px;">Total: {{ posts.count }} post{{ posts.count|pluralize }}</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'category_edit' category.pk %}" style="padding: 6px 14px; background-color: #28a745; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">Edit</a>
+            <a href="{% url 'category_delete' category.pk %}" style="padding: 6px 14px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">Delete</a>
+        </div>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+
+    <h3>Posts in this Category:</h3>
+    {% if posts %}
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            {% for post in posts %}
+                <div style="border: 1px solid #ddd; border-radius: 6px; padding: 15px; background: #fff; display: flex; gap: 15px; align-items: flex-start;">
+                    {% if post.thumb %}
+                        <img src="{{ post.thumb.url }}" alt="{{ post.title }}" style="width: 120px; height: 80px; object-fit: cover; border-radius: 4px;">
+                    {% endif %}
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0 0 6px 0;">
+                            <a href="{% url 'blog_details' post.id %}" style="color: #333; text-decoration: none;">
+                                {{ post.title }}
+                            </a>
+                        </h4>
+                        <p style="color: #666; font-size: 13px; margin: 0 0 8px 0;">
+                            {{ post.description|truncatewords:20 }}
+                        </p>
+                        <small style="color: #999;">Published on: {{ post.created_at|date:"F j, Y" }}</small>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: #888; font-style: italic;">No posts under this category yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
+

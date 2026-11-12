@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 450px; margin: 40px auto; font-family: sans-serif; padding: 25px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+    <h2 style="margin-top: 0; text-align: center;">Create an Account</h2>
+
+    {% if form.non_field_errors %}
+        <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 14px;">
+            {% for error in form.non_field_errors %}
+                <p style="margin: 0;">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" novalidate>
+        {% csrf_token %}
+
+        <div style="margin-bottom: 15px;">
+            <label for="{{ form.username.id_for_label }}" style="display: block; font-weight: bold; margin-bottom: 5px;">Username:</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.username.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="{{ form.email.id_for_label }}" style="display: block; font-weight: bold; margin-bottom: 5px;">Email:</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.email.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <label for="location" style="font-weight: bold;">Location (Auto-detected):</label>
+                <button type="button" onclick="detectLocation()" style="background: none; border: none; color: #007bff; font-size: 12px; cursor: pointer; padding: 0;">
+                    &#x21bb; Refresh Location
+                </button>
+            </div>
+            <input 
+                type="text" 
+                id="location" 
+                name="location" 
+                placeholder="Detecting your location..." 
+                style="width: 100%; padding: 8px; box-sizing: border-box; background-color: #f8f9fa;"
+                readonly
+            >
+            <small id="location-status" style="color: #666; font-size: 12px; display: block; margin-top: 4px;">
+                Tracking location via browser GPS...
+            </small>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="{{ form.password1.id_for_label }}" style="display: block; font-weight: bold; margin-bottom: 5px;">Password:</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.password1.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.password2.id_for_label }}" style="display: block; font-weight: bold; margin-bottom: 5px;">Confirm Password:</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.password2.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            Register
+        </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 20px; font-size: 14px;">
+        Already have an account? <a href="{% url 'login' %}" style="color: #007bff; text-decoration: none;">Log in here</a>
+    </div>
+</div>
+
+<script>
+function detectLocation() {
+    const locInput = document.getElementById('location');
+    const statusText = document.getElementById('location-status');
+    statusText.innerText = 'Detecting your location...';
+    locInput.value = '';
+
+    if (!navigator.geolocation) {
+        statusText.innerText = 'Geolocation not supported. Please type manually.';
+        locInput.removeAttribute('readonly');
+        locInput.style.backgroundColor = '#fff';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            statusText.innerText = 'Resolving area...';
+
+            try {
+                // Free OpenStreetMap reverse geocoding
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+                const data = await res.json();
+                const addr = data.address || {};
+                
+                const area = addr.suburb || addr.neighbourhood || addr.residential || addr.road || '';
+                const city = addr.city || addr.state_district || addr.state || 'Dhaka';
+
+                let detectedLoc = area ? `${area}, ${city}` : city;
+                locInput.value = detectedLoc;
+                statusText.innerText = `Detected: ${detectedLoc}`;
+                statusText.style.color = '#28a745';
+            } catch (err) {
+                statusText.innerText = 'Could not resolve exact address. You may type manually.';
+                locInput.removeAttribute('readonly');
+                locInput.style.backgroundColor = '#fff';
+            }
+        },
+        function(error) {
+            statusText.innerText = 'Location access denied or unavailable. Please type manually.';
+            locInput.removeAttribute('readonly');
+            locInput.style.backgroundColor = '#fff';
+            locInput.placeholder = 'e.g. Mirpur-14, Dhaka';
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+    );
+}
+
+// Automatically detect location when page loads
+window.addEventListener('DOMContentLoaded', detectLocation);
+</script>
+{% endblock %}
+

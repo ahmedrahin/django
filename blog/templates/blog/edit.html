@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Edit - {{ post.title }}
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 30px auto; font-family: sans-serif;">
+    <h2>Edit Blog Post</h2>
+
+    <form action="{% url 'blog_edit' post.id %}" method="POST" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <div style="margin-bottom: 15px;">
+            <label for="title" style="display: block; font-weight: bold; margin-bottom: 5px;">Title:</label>
+            <input 
+                type="text" 
+                id="title" 
+                name="title" 
+                value="{{ form.title.value|default:'' }}" 
+                placeholder="Enter blog title" 
+                style="width: 100%; padding: 8px; box-sizing: border-box; {% if form.title.errors %}border: 1px solid #dc3545;{% endif %}"
+            >
+            {% if form.title.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.title.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="id_category" style="display: block; font-weight: bold; margin-bottom: 5px;">Category:</label>
+            {{ form.category }}
+            {% if form.category.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.category.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="description" style="display: block; font-weight: bold; margin-bottom: 5px;">Description:</label>
+            <textarea 
+                id="description" 
+                name="description" 
+                rows="5" 
+                placeholder="Enter description..." 
+                style="width: 100%; padding: 8px; box-sizing: border-box; {% if form.description.errors %}border: 1px solid #dc3545;{% endif %}"
+            >{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.description.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">Thumbnail:</label>
+            {% if post.thumb %}
+                <div style="margin-bottom: 10px;">
+                    <p style="margin: 0 0 5px 0; color: #666; font-size: 13px;">Current Thumbnail:</p>
+                    <img src="{{ post.thumb.url }}" alt="{{ post.title }}" style="width: 120px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                </div>
+            {% endif %}
+            <label for="thumb" style="display: block; font-size: 13px; color: #555; margin-bottom: 5px;">Upload new thumbnail (replaces current one):</label>
+            <input type="file" id="thumb" name="thumb" accept="image/*">
+            {% if form.thumb.errors %}
+                <div style="color: #dc3545; font-size: 13px; margin-top: 5px;">
+                    {{ form.thumb.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold;">
+            Update Post
+        </button>
+
+        <a href="{% url 'blog_details' post.id %}" style="margin-left: 15px; color: #666; text-decoration: none;">Cancel</a>
+    </form>
+</div>
+{% endblock %}
